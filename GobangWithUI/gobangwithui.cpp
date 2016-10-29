@@ -1,20 +1,20 @@
 #include "gobangwithui.h"
+#include "minimax_search.h"
 #include <chrono>
 
-int GobangWithUI::depth_;
-
-Trans_map GobangWithUI::trans_map{ 48 };
-
 GobangWithUI::GobangWithUI(QWidget *parent)
-	: QMainWindow(parent), num_count(0), black(Board::State::Computer), white(Board::State::Player)
+	: QMainWindow(parent), num_count(0)
 {
 	setMaximumHeight(640);
 	setMinimumHeight(640);
 	setMaximumSize(640, 640);
 	setMinimumSize(640, 640);
 	ui.setupUi(this);
-	connect(ui.action_3, SIGNAL(triggered()), this, SLOT(set_player_black()));
-	connect(ui.action_4, SIGNAL(triggered()), this, SLOT(set_computer_black()));
+	connect(ui.play_black, SIGNAL(triggered()), this, SLOT(set_black_player()));
+	connect(ui.play_white, SIGNAL(triggered()), this, SLOT(set_black_computer()));
+	connect(ui.AI_opponent, SIGNAL(triggered()), this, SLOT(set_opponent_AI()));
+	connect(ui.human_oppenent, SIGNAL(triggered()), this, SLOT(set_opponent_player()));
+	connect(ui.clear_board, SIGNAL(triggered()), this, SLOT(clear_board()));
 	default_first_move();
 }
 
@@ -51,22 +51,42 @@ void GobangWithUI::paintEvent(QPaintEvent*)
 	}
 }
 
-void GobangWithUI::set_computer_black()
+void GobangWithUI::set_black_computer()
 {
-	black = Board::State::Computer;
-	white = Board::State::Player;
+	Board::set_black_computer();
 	clear();
 	default_first_move();
 }
 
-void GobangWithUI::set_player_black()
+void GobangWithUI::set_black_player()
 {
-	black = Board::State::Player;
-	white = Board::State::Computer;
+	Board::set_black_player();
 	clear();
 	update();
 }
 
+void GobangWithUI::set_opponent_AI()
+{
+	ui.play_black->setEnabled(true);
+	ui.play_white->setEnabled(true);
+	set_black_computer();
+}
+
+void GobangWithUI::set_opponent_player()
+{
+	ui.play_black->setEnabled(false);
+	ui.play_white->setEnabled(false);
+	Board::set_opponent_player();
+	clear();
+	update();
+}
+
+void GobangWithUI::clear_board()
+{
+	clear();
+	if (board.is_opponent_AI() && Board::computer == Board::State::Black)
+		default_first_move();
+}
 
 void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 {
@@ -76,23 +96,24 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 	{
 		play(x_pos, y_pos);
 		auto winner = board.get_winner();
-		if (winner == Board::State::Player)
+		if (winner != Board::State::Empty)
 		{
-			auto result = QMessageBox::question(
-				this,
-				"Game Over",
-				"You win\n Do you want to start a new game?",
-				QMessageBox::Yes | QMessageBox::No);
-			if (result == QMessageBox::Yes)
+			if (Board::is_opponent_AI())
 			{
-				clear();
-				if (black == Board::State::Computer)
-					default_first_move();
-			}	
+				if (Board::computer == winner)
+					computer_win();
+				else
+					player_win();
+			}
 			else
-				close();
+			{
+				if (winner == Board::State::White)
+					player_white_win();
+				else
+					player_black_win();
+			}
 		}
-		else if (winner == Board::State::Empty)
+		else
 		{
 			if (num_count == 225)
 			{
@@ -100,35 +121,19 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 			}
 			else
 			{
-				auto move = search_deeper_and_deeper(board);
-				char c = static_cast<char>(depth_ + '0');
-				std::string s = std::string(1, c);
-				QMessageBox::question(
-					this,
-					"...",
-					s.c_str(),
-					QMessageBox::Yes | QMessageBox::No);
-				play(move.first + 1, move.second + 1);
-				auto winner2 = board.get_winner();
-				if (winner2 == Board::State::Computer)
+				if (Board::is_opponent_AI())
 				{
-					auto result = QMessageBox::question(
-						this,
-						"Game Over",
-						"You lose\n Do you want to start a new game?",
-						QMessageBox::Yes | QMessageBox::No);
-					if (result == QMessageBox::Yes)
+					auto move = Minimax_search::minimax_search(board);
+					play(move.first + 1, move.second + 1);
+					auto winner2 = board.get_winner();
+					if (winner2 == Board::computer)
 					{
-						clear();
-						if (black == Board::State::Computer)
-							default_first_move();
+						computer_win();
 					}
-					else
-						close();
-				}
-				else if (num_count == 225)
-				{
-					tie();
+					else if (num_count == 225)
+					{
+						tie();
+					}
 				}
 			}
 		}
@@ -142,44 +147,9 @@ void GobangWithUI::clear()
 	update();
 }
 
-std::pair<int, int> GobangWithUI::search_deeper_and_deeper(Board b)
-{
-	using namespace std::chrono;
-	auto moves = b.possible_moves();
-	for (auto &move : moves)
-	{
-		b.play(move.first, move.second, Board::State::Computer);
-		if (b.get_winner() == Board::State::Computer)
-			return move;
-		b.erase(move.first, move.second);
-	}
-	for (auto &move : moves)
-	{
-		b.play(move.first, move.second, Board::State::Player);
-		if (b.get_winner() == Board::State::Player)
-			return move;
-		b.erase(move.first, move.second);
-	}
-	for (int depth = 0; ; ++depth)
-	{
-		auto start = system_clock::now();
-		auto e_map = root_search(b, depth, moves);
-		std::sort(moves.begin(), moves.end(),
-			[&](std::pair<int, int>&lhs, std::pair<int, int>&rhs) {return e_map[lhs] >= e_map[rhs]; });
-		auto now = system_clock::now();
-		QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-		if (duration_cast<milliseconds>(now - start) > milliseconds(2000))
-		{
-			depth_ = depth;
-			break;
-		}		
-	}
-	return moves.front();
-}
-
 void GobangWithUI::default_first_move()
 {
-	board.play(7, 7, Board::State::Computer);
+	board.play(7, 7, Board::State::Black);
 	point_state[num_count].first = 320;
 	point_state[num_count].second = 320;
 	++num_count;
@@ -190,11 +160,11 @@ void GobangWithUI::play(int x_pos, int y_pos)
 {
 	if (num_count % 2 == 0)
 	{
-		board.play(x_pos - 1, y_pos - 1, black);
+		board.play(x_pos - 1, y_pos - 1, Board::State::Black);
 	}
 	else
 	{
-		board.play(x_pos - 1, y_pos - 1, white);
+		board.play(x_pos - 1, y_pos - 1, Board::State::White);
 	}
 	point_state[num_count].first = x_pos * 40;
 	point_state[num_count].second = y_pos * 40;
@@ -211,171 +181,69 @@ void GobangWithUI::tie()
 	if (result == QMessageBox::Yes)
 	{
 		clear();
-		if (black == Board::State::Computer)
+		if (Board::computer == Board::State::Black)
 			default_first_move();
 	}
 	else
 		close();
 }
 
-std::map<std::pair<int, int>, int> GobangWithUI::root_search(Board b, int depth, std::vector<std::pair<int, int>> moves)
+void GobangWithUI::computer_win()
 {
-	async_queue<int> as_queue(10);
-	//auto moves = b.possible_moves();
-	for (const auto &move : moves)
+	auto result = QMessageBox::question(
+		this,
+		"Game Over",
+		"You lose\n Do you want to start a new game?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (result == QMessageBox::Yes)
 	{
-		if (b.get_state(move.first, move.second) == Board::State::Empty)
-		{
-			b.play(move.first, move.second, Board::State::Computer);
-			//if (b.get_winner() == computer)
-			//	return move;
-			as_queue.produce(min, b, -Infinity, Infinity, depth, update_moves(b, moves, move));
-			b.erase(move.first, move.second);
-		}
+		clear();
+		if (Board::computer == Board::State::Black)
+			default_first_move();
 	}
-	auto results = as_queue.consume_all();
-	std::map<std::pair<int, int>, int> moves_evaluation;
-	for (int i = 0; i != moves.size(); ++i)
-	{
-		moves_evaluation[moves[i]] = results[i];
-	}
-	return moves_evaluation/*moves[std::max_element(results.begin(), results.end()) - results.begin()]*/;
+	else
+		close();
 }
 
-int GobangWithUI::min(Board b, int alpha, int beta, int depth, std::vector<std::pair<int, int>> moves)
+void GobangWithUI::player_win()
 {
-	auto flag = Hash_tag::Hash_flag::Alpha;
-	auto zobrist_value = b.get_zobrist_value();
-	auto hash_tag = trans_map[zobrist_value];
-	auto val = hash_tag.get_value(depth, alpha, beta, zobrist_value);
-	if (val != ValUnknown)
-		return val;
-	if (depth == 0)
+	auto result = QMessageBox::question(
+		this,
+		"Game Over",
+		"You win\n Do you want to start a new game?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (result == QMessageBox::Yes)
 	{
-		auto result = b.evaluate();
-		hash_tag.set(depth, result, Hash_tag::Hash_flag::Exact, zobrist_value);
-		return result;
-		//std::unique_lock<spinlock> l(lock);
-		//auto pos = m.find(zobrist_value);
-		//if (pos == m.end())
-		//{
-		//	auto result = b.evaluate();
-		//	m[zobrist_value] = result;
-		//	return result;
-		//}
-		//return pos->second;
-		//return b.evaluate();
+		clear();
+		if (Board::computer == Board::State::Black)
+			default_first_move();
 	}
-	for (const auto &move : moves)
-	{
-		if (b.get_state(move.first, move.second) == Board::State::Empty)
-		{
-			b.play(move.first, move.second, Board::State::Player);
-			if (b.get_winner() == Board::State::Player)
-			{
-				return -Infinity;
-			}
-			auto score = max(b, alpha, beta, depth - 1, update_moves(b, moves, move));
-			b.erase(move.first, move.second);
-			if (score < beta)
-			{
-				flag = Hash_tag::Hash_flag::Exact;
-				beta = score;
-			}
-			if (alpha >= beta)
-			{
-				hash_tag.set(depth, alpha, Hash_tag::Hash_flag::Beta, zobrist_value);
-				return beta;
-			}
-		}
-	}
-	hash_tag.set(depth, alpha, flag, zobrist_value);
-	return beta;
+	else
+		close();
 }
 
-int GobangWithUI::max(Board b, int alpha, int beta, int depth, std::vector<std::pair<int, int>> moves)
+void GobangWithUI::player_black_win()
 {
-	auto flag = Hash_tag::Hash_flag::Alpha;
-	auto zobrist_value = b.get_zobrist_value();
-	auto hash_tag = trans_map[zobrist_value];
-	auto val = hash_tag.get_value(depth, alpha, beta, zobrist_value);
-	if (val != ValUnknown)
-		return val;
-	if (depth == 0 || b.get_winner() != Board::State::Empty)
-	{
-		auto result = b.evaluate();
-		hash_tag.set(depth, result, Hash_tag::Hash_flag::Exact, zobrist_value);
-		return result;
-		//std::unique_lock<spinlock> l(lock);
-		//auto pos = m.find(zobrist_value);
-		//if (pos == m.end())
-		//{
-		//	auto result = b.evaluate();
-		//	m[zobrist_value] = result;
-		//	return result;
-		//}
-		//return pos->second;
-		//return b.evaluate();
-	}
-	for (const auto &move : moves)
-	{
-		if (b.get_state(move.first, move.second) == Board::State::Empty)
-		{
-			b.play(move.first, move.second, Board::State::Computer);
-			auto score = min(b, alpha, beta, depth - 1, update_moves(b, moves, move));
-			b.erase(move.first, move.second);
-			if (score > alpha)
-			{
-				flag = Hash_tag::Hash_flag::Exact;
-				alpha = score;
-			}
-			if (alpha >= beta)
-			{
-				hash_tag.set(depth, alpha, Hash_tag::Hash_flag::Beta, zobrist_value);
-				return alpha;
-			}
-		}
-	}
-	hash_tag.set(depth, alpha, flag, zobrist_value);
-	return alpha;
+	auto result = QMessageBox::question(
+		this,
+		"Game Over",
+		"Black win\n Do you want to start a new game?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (result == QMessageBox::Yes)
+		clear();
+	else
+		close();
 }
 
-std::vector<std::pair<int, int>> GobangWithUI::update_moves(const Board& b,
-	const std::vector<std::pair<int, int>>& moves, const std::pair<int, int>& pos)
+void GobangWithUI::player_white_win()
 {
-	std::vector<std::pair<int, int>> update; //possible new moves
-	auto no_more_than_14 = [](int n) {return n > 14 ? 14 : n; }; //avoid out of bound
-	auto no_less_than_0 = [](int n) {return n < 0 ? 0 : n; };	//avoid out of bound
-	auto push_back_if_empty = [&](int x_pos, int y_pos) //push back if the position is "empty" and it's not in the "moves"
-	{
-		if (b.get_state(x_pos, y_pos) == Board::State::Empty)
-		{
-			if (std::binary_search(moves.begin(), moves.end(), std::pair<int, int>{x_pos, y_pos}))
-			{
-				update.push_back({ x_pos,y_pos });
-			}
-		}
-	};
-	auto &x_pos = pos.first;
-	auto &y_pos = pos.second;
-	for (int k = 1; k <= 2; ++k)
-	{
-		push_back_if_empty(x_pos, no_more_than_14(y_pos + k));
-		push_back_if_empty(x_pos, no_less_than_0(y_pos - k));
-		push_back_if_empty(no_more_than_14(x_pos + k), y_pos);
-		push_back_if_empty(no_less_than_0(x_pos - k), y_pos);
-		push_back_if_empty(no_more_than_14(x_pos + k), no_more_than_14(y_pos + k));
-		push_back_if_empty(no_less_than_0(x_pos - k), no_more_than_14(y_pos + k));
-		push_back_if_empty(no_more_than_14(x_pos + k), no_less_than_0(y_pos - k));
-		push_back_if_empty(no_less_than_0(x_pos - k), no_less_than_0(y_pos - k));
-	}	
-	auto result(update);
-	result.resize(update.size() + moves.size());
-	std::copy(moves.begin(), moves.end(), result.begin() + update.size());//make new and old moves together
-	result.erase(std::find(result.begin(), result.end(), pos));
-	return result;
+	auto result = QMessageBox::question(
+		this,
+		"Game Over",
+		"White win\n Do you want to start a new game?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (result == QMessageBox::Yes)
+		clear();
+	else
+		close();
 }
-
-
-
-

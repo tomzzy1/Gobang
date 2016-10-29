@@ -5,6 +5,10 @@
 
 Board::BoardTable Board::random_table = random_init();
 
+Board::State Board::computer = State::Black;
+
+Board::State Board::player = State::White;
+
 std::vector<std::pair<int, int>> Board::possible_moves()
 {
 	using int_pair = std::pair<int, int>;
@@ -19,7 +23,7 @@ std::vector<std::pair<int, int>> Board::possible_moves()
 	for (int i = 0; i < 15; ++i)
 		for (int j = 0; j < 15; ++j)
 		{
-			if (points[i][j] != State::Empty)
+			if (points[i][j] != State::Empty) //position around a not empty position is meaningful
 			{
 				for (int k = 1; k <= 2; ++k)
 				{
@@ -44,50 +48,50 @@ Board::State Board::get_winner() const
 	for (int i = 0; i < 15; ++i)
 		for (int j = 0; j < 11; ++j)
 		{
-			if (points[i][j] == State::Computer
-				&& points[i][j + 1] == State::Computer && points[i][j + 2] == State::Computer
-				&& points[i][j + 3] == State::Computer && points[i][j + 4] == State::Computer)
-				return State::Computer;
-			if (points[i][j] == State::Player
-				&& points[i][j + 1] == State::Player && points[i][j + 2] == State::Player
-				&& points[i][j + 3] == State::Player && points[i][j + 4] == State::Player)
-				return State::Player;
+			if (points[i][j] == State::Black
+				&& points[i][j + 1] == State::Black && points[i][j + 2] == State::Black
+				&& points[i][j + 3] == State::Black && points[i][j + 4] == State::Black)
+				return State::Black;
+			if (points[i][j] == State::White
+				&& points[i][j + 1] == State::White && points[i][j + 2] == State::White
+				&& points[i][j + 3] == State::White && points[i][j + 4] == State::White)
+				return State::White;
 		}
 	for (int i = 0; i < 11; ++i)
 		for (int j = 0; j < 15; ++j)
 		{
-			if (points[i][j] == State::Computer
-				&& points[i + 1][j] == State::Computer && points[i + 2][j] == State::Computer
-				&& points[i + 3][j] == State::Computer && points[i + 4][j] == State::Computer)
-				return State::Computer;
-			if (points[i][j] == State::Player
-				&& points[i + 1][j] == State::Player && points[i + 2][j] == State::Player
-				&& points[i + 3][j] == State::Player && points[i + 4][j] == State::Player)
-				return State::Player;
+			if (points[i][j] == State::Black
+				&& points[i + 1][j] == State::Black && points[i + 2][j] == State::Black
+				&& points[i + 3][j] == State::Black && points[i + 4][j] == State::Black)
+				return State::Black;
+			if (points[i][j] == State::White
+				&& points[i + 1][j] == State::White && points[i + 2][j] == State::White
+				&& points[i + 3][j] == State::White && points[i + 4][j] == State::White)
+				return State::White;
 		}
 	for (int i = 0; i < 11; ++i)
 		for (int j = 0; j < 11; ++j)
 		{
-			if (points[i][j] == State::Computer
-				&& points[i + 1][j + 1] == State::Computer && points[i + 2][j + 2] == State::Computer
-				&& points[i + 3][j + 3] == State::Computer && points[i + 4][j + 4] == State::Computer)
-				return State::Computer;
-			if (points[i][j] == State::Player
-				&& points[i + 1][j + 1] == State::Player && points[i + 2][j + 2] == State::Player
-				&& points[i + 3][j + 3] == State::Player && points[i + 4][j + 4] == State::Player)
-				return State::Player;
+			if (points[i][j] == State::Black
+				&& points[i + 1][j + 1] == State::Black && points[i + 2][j + 2] == State::Black
+				&& points[i + 3][j + 3] == State::Black && points[i + 4][j + 4] == State::Black)
+				return State::Black;
+			if (points[i][j] == State::White
+				&& points[i + 1][j + 1] == State::White && points[i + 2][j + 2] == State::White
+				&& points[i + 3][j + 3] == State::White && points[i + 4][j + 4] == State::White)
+				return State::White;
 		}
 	for (int i = 0; i < 11; ++i)
 		for (int j = 14; j >= 4; --j)
 		{
-			if (points[i][j] == State::Computer
-				&& points[i + 1][j - 1] == State::Computer && points[i + 2][j - 2] == State::Computer
-				&& points[i + 3][j - 3] == State::Computer && points[i + 4][j - 4] == State::Computer)
-				return State::Computer;
-			if (points[i][j] == State::Player
-				&& points[i + 1][j - 1] == State::Player && points[i + 2][j - 2] == State::Player
-				&& points[i + 3][j - 3] == State::Player && points[i + 4][j - 4] == State::Player)
-				return State::Player;
+			if (points[i][j] == State::Black
+				&& points[i + 1][j - 1] == State::Black && points[i + 2][j - 2] == State::Black
+				&& points[i + 3][j - 3] == State::Black && points[i + 4][j - 4] == State::Black)
+				return State::Black;
+			if (points[i][j] == State::White
+				&& points[i + 1][j - 1] == State::White && points[i + 2][j - 2] == State::White
+				&& points[i + 3][j - 3] == State::White && points[i + 4][j - 4] == State::White)
+				return State::White;
 		}
 	return State::Empty;
 }
@@ -98,9 +102,9 @@ long long Board::get_zobrist_value() const
 	for (int i = 0; i < 15; ++i)
 		for (int j = 0; j < 15; ++j)
 		{
-			if (points[i][j] == State::Computer)
+			if (points[i][j] == State::Black)
 				sum ^= random_table[i][j].first;
-			if (points[i][j] == State::Player)
+			if (points[i][j] == State::White)
 				sum ^= random_table[i][j].second;
 		}
 	return sum;

@@ -140,6 +140,12 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,6 +178,7 @@
     <ClCompile Include="gobangwithui.cpp" />
     <ClCompile Include="Hash_tag.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="minimax_search.cpp" />
     <ClCompile Include="Trans_map.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -219,6 +226,7 @@
     <ClInclude Include="Board.h" />
     <ClInclude Include="GeneratedFiles\ui_gobangwithui.h" />
     <ClInclude Include="Hash_tag.h" />
+    <ClInclude Include="minimax_search.h" />
     <ClInclude Include="Trans_map.h" />
   </ItemGroup>
   <ItemGroup>

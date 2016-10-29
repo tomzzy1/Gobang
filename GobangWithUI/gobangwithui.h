@@ -11,10 +11,7 @@
 #include <QMessageBox>
 #include <array>
 #include "Board.h"
-#include <async_queue.h>
 #include "GeneratedFiles/ui_gobangwithui.h"
-#include "Trans_map.h"
-
 
 class GobangWithUI : public QMainWindow
 {
@@ -27,27 +24,24 @@ public:
 	void paintEvent(QPaintEvent*) override;
 	void mousePressEvent(QMouseEvent *mouseEvent) override;
 	void clear();
-	static std::pair<int, int> search_deeper_and_deeper(Board b);
-	static std::map<std::pair<int, int>, int> root_search(Board b, int depth, std::vector<std::pair<int, int>> moves);
-	static int min(Board b, int alpha, int beta, int depth, std::vector<std::pair<int, int>> moves);
-	static int max(Board b, int alpha, int beta, int depth, std::vector<std::pair<int, int>> moves);
-	static std::vector<std::pair<int, int>> update_moves(const Board &b,
-		const std::vector<std::pair<int, int>> &moves, const std::pair<int, int> &pos);
+	void computer_win();
+	void player_win();
+	void player_black_win();
+	void player_white_win();
 	void default_first_move();
 	void play(int x_pos, int y_pos);
 	void tie();
 private:
-	static int depth_;
-	static Trans_map trans_map;
 	Ui::GobangWithUIClass ui;
 	Board board;
 	int num_count;
-	Board::State black;
-	Board::State white;
 	std::array<std::pair<int, int>, 225> point_state;
 public slots:
-	void set_computer_black();
-	void set_player_black();
+	void set_black_computer();
+	void set_black_player();
+	void set_opponent_AI();
+	void set_opponent_player();
+	void clear_board();
 };
 
 

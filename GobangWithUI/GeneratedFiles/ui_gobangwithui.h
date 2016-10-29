@@ -26,23 +26,33 @@ QT_BEGIN_NAMESPACE
 class Ui_GobangWithUIClass
 {
 public:
-    QAction *action_3;
-    QAction *action_4;
+    QAction *play_black;
+    QAction *play_white;
+    QAction *AI_opponent;
+    QAction *human_oppenent;
+    QAction *clear_board;
     QWidget *centralWidget;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
     QMenuBar *menuBar;
     QMenu *menu;
+    QMenu *menu_2;
 
     void setupUi(QMainWindow *GobangWithUIClass)
     {
         if (GobangWithUIClass->objectName().isEmpty())
             GobangWithUIClass->setObjectName(QStringLiteral("GobangWithUIClass"));
         GobangWithUIClass->resize(600, 400);
-        action_3 = new QAction(GobangWithUIClass);
-        action_3->setObjectName(QStringLiteral("action_3"));
-        action_4 = new QAction(GobangWithUIClass);
-        action_4->setObjectName(QStringLiteral("action_4"));
+        play_black = new QAction(GobangWithUIClass);
+        play_black->setObjectName(QStringLiteral("play_black"));
+        play_white = new QAction(GobangWithUIClass);
+        play_white->setObjectName(QStringLiteral("play_white"));
+        AI_opponent = new QAction(GobangWithUIClass);
+        AI_opponent->setObjectName(QStringLiteral("AI_opponent"));
+        human_oppenent = new QAction(GobangWithUIClass);
+        human_oppenent->setObjectName(QStringLiteral("human_oppenent"));
+        clear_board = new QAction(GobangWithUIClass);
+        clear_board->setObjectName(QStringLiteral("clear_board"));
         centralWidget = new QWidget(GobangWithUIClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         GobangWithUIClass->setCentralWidget(centralWidget);
@@ -57,11 +67,18 @@ public:
         menuBar->setGeometry(QRect(0, 0, 600, 26));
         menu = new QMenu(menuBar);
         menu->setObjectName(QStringLiteral("menu"));
+        menu_2 = new QMenu(menuBar);
+        menu_2->setObjectName(QStringLiteral("menu_2"));
         GobangWithUIClass->setMenuBar(menuBar);
 
         menuBar->addAction(menu->menuAction());
-        menu->addAction(action_3);
-        menu->addAction(action_4);
+        menuBar->addAction(menu_2->menuAction());
+        menu->addAction(play_black);
+        menu->addAction(play_white);
+        menu->addAction(clear_board);
+        menu_2->addSeparator();
+        menu_2->addAction(AI_opponent);
+        menu_2->addAction(human_oppenent);
 
         retranslateUi(GobangWithUIClass);
 
@@ -71,9 +88,13 @@ public:
     void retranslateUi(QMainWindow *GobangWithUIClass)
     {
         GobangWithUIClass->setWindowTitle(QApplication::translate("GobangWithUIClass", "GobangWithUI", 0));
-        action_3->setText(QApplication::translate("GobangWithUIClass", "\345\205\210\346\211\213", 0));
-        action_4->setText(QApplication::translate("GobangWithUIClass", "\345\220\216\346\211\213", 0));
+        play_black->setText(QApplication::translate("GobangWithUIClass", "\345\205\210\346\211\213", 0));
+        play_white->setText(QApplication::translate("GobangWithUIClass", "\345\220\216\346\211\213", 0));
+        AI_opponent->setText(QApplication::translate("GobangWithUIClass", "\347\224\265\350\204\221", 0));
+        human_oppenent->setText(QApplication::translate("GobangWithUIClass", "\347\216\251\345\256\266", 0));
+        clear_board->setText(QApplication::translate("GobangWithUIClass", "\346\270\205\347\251\272\346\243\213\345\261\200", 0));
         menu->setTitle(QApplication::translate("GobangWithUIClass", "\351\200\211\351\241\271", 0));
+        menu_2->setTitle(QApplication::translate("GobangWithUIClass", "\345\257\271\346\211\213", 0));
     } // retranslateUi
 
 };

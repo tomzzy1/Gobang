@@ -36,19 +36,44 @@
     <property name="title">
      <string>选项</string>
     </property>
-    <addaction name="action_3"/>
-    <addaction name="action_4"/>
+    <addaction name="play_black"/>
+    <addaction name="play_white"/>
+    <addaction name="clear_board"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>对手</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="AI_opponent"/>
+    <addaction name="human_oppenent"/>
    </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
-  <action name="action_3">
+  <action name="play_black">
    <property name="text">
     <string>先手</string>
    </property>
   </action>
-  <action name="action_4">
+  <action name="play_white">
    <property name="text">
     <string>后手</string>
+   </property>
+  </action>
+  <action name="AI_opponent">
+   <property name="text">
+    <string>电脑</string>
+   </property>
+  </action>
+  <action name="human_oppenent">
+   <property name="text">
+    <string>玩家</string>
+   </property>
+  </action>
+  <action name="clear_board">
+   <property name="text">
+    <string>清空棋局</string>
    </property>
   </action>
  </widget>

@@ -6,7 +6,9 @@ class Board
 {
 public:
 
-	enum class State { Computer, Player, Empty };
+	enum class State { Black, White, Empty };
+	static State computer;
+	static State player;
 
 	Board()
 		:points(15, std::vector<State>(15, State::Empty)) {};
@@ -30,13 +32,33 @@ public:
 	std::vector<std::pair<int, int>> possible_moves();
 	int evaluate()const
 	{
-		return evaluate_aux(State::Computer) - 0.8 * evaluate_aux(State::Player);
+		if (computer == State::Black)
+			return evaluate_aux(computer) - 0.8 * evaluate_aux(player);
+		return evaluate_aux(player) - 0.8 * evaluate_aux(computer); //computer plays white
 	}
 	void clear()
 	{
 		for (auto &row : points)
 			for (auto &col : row)
 				col = State::Empty;
+	}
+	static void set_black_computer()
+	{
+		computer = State::Black;
+		player = State::White;
+	}
+	static void set_black_player()
+	{
+		computer = State::White;
+		player = State::Black;
+	}
+	static void set_opponent_player()
+	{
+		computer = State::Empty;
+	}
+	static bool is_opponent_AI()
+	{
+		return computer != State::Empty;
 	}
 	State get_winner()const;
 	long long get_zobrist_value()const;
