@@ -1,5 +1,4 @@
 #include "Hash_tag.h"
-#include <mutex>
 
 Hash_tag::~Hash_tag()
 {
@@ -7,43 +6,28 @@ Hash_tag::~Hash_tag()
 
 void Hash_tag::set(int d, int v, Hash_flag type, long long zobrist)
 {
-	if (d <= depth_ || hash_type == Hash_flag::Empty)
-	{
-		std::lock_guard<Spinlock> guard(lock);
-		depth_ = d;
-		score = v;
-		hash_type = type;
-		key = zobrist;
-	}
+	depth_ = d;
+	v = val;
+	hash_type = type;
+	key = zobrist;
 }
 
-void Hash_tag::clear()
-{
-	hash_type = Hash_flag::Empty;
-}
-
-int Hash_tag::get_score(int depth, int& alpha, int& beta, long long zobrist) const
+int Hash_tag::get_value(int depth, int alpha, int beta, long long zobrist) const
 {
 	if (depth >= depth_ && zobrist == key)
 	{
-		if (hash_type == Hash_flag::Alpha)
+		if (hash_type == Hash_flag::Alpha && val <= alpha)
 		{
-			if (score <= alpha)
-				return alpha;
-			if (score < beta)
-				beta = score;
+			return alpha;
 		}
-		else if (hash_type == Hash_flag::Beta)
+		if (hash_type == Hash_flag::Beta && val >= beta)
 		{
-			if(score >= beta)
-				return beta;
-			if (score > alpha)
-				alpha = score;
+			return beta;
 		}
-		else if (hash_type == Hash_flag::Exact)
+		if (hash_type == Hash_flag::Exact)
 		{
-			return score;
+			return val;
 		}
 	}
-	return Val_unknown;
+	return ValUnknown;
 }

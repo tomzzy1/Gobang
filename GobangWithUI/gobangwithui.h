@@ -12,13 +12,13 @@
 #include <array>
 #include "Board.h"
 #include "GeneratedFiles/ui_gobangwithui.h"
-#include "negamax.h"
 
 class GobangWithUI : public QMainWindow
 {
 	Q_OBJECT
 
 public:
+	static const int Infinity = 1000000;
 	GobangWithUI(QWidget *parent = 0);
 	~GobangWithUI();
 	void paintEvent(QPaintEvent*) override;
@@ -34,7 +34,6 @@ public:
 private:
 	Ui::GobangWithUIClass ui;
 	Board board;
-	Negamax_search negamax;
 	int num_count;
 	std::array<std::pair<int, int>, 225> point_state;
 public slots:

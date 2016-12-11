@@ -1,20 +1,10 @@
 #include "gobangwithui.h"
+#include "minimax_search.h"
 #include <chrono>
-#include <random>
 
 GobangWithUI::GobangWithUI(QWidget *parent)
 	: QMainWindow(parent), num_count(0)
 {
-	Board::BoardTable table;
-	std::default_random_engine generator(time(nullptr));
-	std::uniform_int_distribution<long long> dis(0, 9223372036854775807LL);
-	for (auto& row : table)
-		for (auto& col : row)
-		{
-			col.first = dis(generator);
-			col.second = dis(generator);
-		}
-	board.init_table(table);
 	setMaximumHeight(640);
 	setMinimumHeight(640);
 	setMaximumSize(640, 640);
@@ -100,12 +90,12 @@ void GobangWithUI::clear_board()
 
 void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 {
-	const int x_pos = static_cast<float>(mouseEvent->x() / 40.0) + 0.5;
-	const int y_pos = static_cast<float>(mouseEvent->y() / 40.0) + 0.5;
+	int x_pos = static_cast<float>(mouseEvent->x() / 40.0) + 0.5;
+	int y_pos = static_cast<float>(mouseEvent->y() / 40.0) + 0.5;
 	if (x_pos > 0 && x_pos <= 15 && y_pos > 0 && y_pos <= 15 && board.get_state(x_pos - 1, y_pos - 1) == Board::State::Empty)
 	{
 		play(x_pos, y_pos);
-		const auto winner = board.get_winner();
+		auto winner = board.get_winner();
 		if (winner != Board::State::Empty)
 		{
 			if (Board::is_opponent_AI())
@@ -133,10 +123,9 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 			{
 				if (Board::is_opponent_AI())
 				{
-					auto move = negamax.search(board);
-					QMessageBox::question(this, "depth", std::to_string(negamax.depth_.load()).c_str(), QMessageBox::Yes);
+					auto move = Minimax_search::minimax_search(board);
 					play(move.first + 1, move.second + 1);
-					const auto winner2 = board.get_winner();
+					auto winner2 = board.get_winner();
 					if (winner2 == Board::computer)
 					{
 						computer_win();

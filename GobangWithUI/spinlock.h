@@ -1,10 +1,11 @@
 #pragma once
 #include <atomic>
 
-class Spinlock
+class spinlock
 {
 public:
-	Spinlock() : state_(LockState::Unlocked) {}
+	spinlock() : state_(LockState::Unlocked) {}
+
 	void lock()
 	{
 		while (state_.exchange(LockState::Locked, std::memory_order_acquire) == LockState::Locked) {

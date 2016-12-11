@@ -8,7 +8,7 @@ template<typename T>
 class async_queue
 {
 public:
-	async_queue(size_t c = 10) :size(c), count(c) {}
+	async_queue(size_t c = 10) :count(c) {}
 	async_queue(async_queue<T>&) = delete;
 	async_queue& operator=(const async_queue<T>&) = delete;	
 	async_queue& operator=(async_queue<T>&& aq)noexcept
@@ -34,12 +34,8 @@ public:
 	{
 		if (count == 0)
 		{
-			for (int i = 0; i < size / 5; ++i)
-			{
-				results.push_back(future_queue.front().get());
-				future_queue.pop();
-			}
-			count += size / 5;
+			results.push_back(future_queue.front().get());
+			future_queue.pop();
 			auto future = std::async(std::launch::async, std::forward<Fn>(function), std::forward<args>(Args)...);
 			future_queue.push(std::move(future));		
 		}
@@ -75,7 +71,6 @@ public:
 	}
 
 private:
-	const size_t size;
 	std::queue<std::future<T>> future_queue;
 	std::vector<T> results;
 	size_t count;
