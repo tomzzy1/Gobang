@@ -1,9 +1,7 @@
 #include "Board.h"
 #include <set>
-#include <random>
-#include <ctime>
 
-Board::BoardTable Board::random_table = random_init();
+Board::BoardTable Board::random_table;
 
 Board::State Board::computer = State::Black;
 
@@ -11,11 +9,10 @@ Board::State Board::player = State::White;
 
 std::vector<std::pair<int, int>> Board::possible_moves()
 {
-	using int_pair = std::pair<int, int>;
 	auto no_more_than_14 = [](int n) {return n > 14 ? 14 : n; };
 	auto no_less_than_0 = [](int n) {return n < 0 ? 0 : n; };
-	std::set<int_pair> moves;
-	auto push_back_if_empty = [&](int x_pos, int y_pos)
+	std::set<std::pair<int, int>> moves;
+	auto insert_if_empty = [&](int x_pos, int y_pos)
 	{
 		if (points[x_pos][y_pos] == State::Empty)
 			moves.insert({ x_pos,y_pos });
@@ -27,18 +24,18 @@ std::vector<std::pair<int, int>> Board::possible_moves()
 			{
 				for (int k = 1; k <= 2; ++k)
 				{
-					push_back_if_empty(i, no_more_than_14(j + k));
-					push_back_if_empty(i, no_less_than_0(j - k));
-					push_back_if_empty(no_more_than_14(i + k), j);
-					push_back_if_empty(no_less_than_0(i - k), j);
-					push_back_if_empty(no_more_than_14(i + k), no_more_than_14(j + k));
-					push_back_if_empty(no_less_than_0(i - k), no_more_than_14(j + k));
-					push_back_if_empty(no_more_than_14(i + k), no_less_than_0(j - k));
-					push_back_if_empty(no_less_than_0(i - k), no_less_than_0(j - k));
+					insert_if_empty(i, no_more_than_14(j + k));
+					insert_if_empty(i, no_less_than_0(j - k));
+					insert_if_empty(no_more_than_14(i + k), j);
+					insert_if_empty(no_less_than_0(i - k), j);
+					insert_if_empty(no_more_than_14(i + k), no_more_than_14(j + k));
+					insert_if_empty(no_less_than_0(i - k), no_more_than_14(j + k));
+					insert_if_empty(no_more_than_14(i + k), no_less_than_0(j - k));
+					insert_if_empty(no_less_than_0(i - k), no_less_than_0(j - k));
 				}
 			}
 		}
-	std::vector<int_pair> temp(moves.size());
+	std::vector<std::pair<int, int>> temp(moves.size());
 	std::copy(moves.begin(), moves.end(), temp.begin());
 	return temp;
 }
@@ -94,34 +91,6 @@ Board::State Board::get_winner() const
 				return State::White;
 		}
 	return State::Empty;
-}
-
-long long Board::get_zobrist_value() const
-{
-	long long sum = 0xFFFFFF;
-	for (int i = 0; i < 15; ++i)
-		for (int j = 0; j < 15; ++j)
-		{
-			if (points[i][j] == State::Black)
-				sum ^= random_table[i][j].first;
-			if (points[i][j] == State::White)
-				sum ^= random_table[i][j].second;
-		}
-	return sum;
-}
-
-Board::BoardTable Board::random_init()
-{
-	BoardTable a;
-	std::default_random_engine generator(time(nullptr));
-	std::uniform_int_distribution<long long> dis(0, 9223372036854775807LL);
-	for (auto &row : a)
-		for (auto &col : row)
-		{
-			col.first = dis(generator);
-			col.second = dis(generator);
-		}
-	return a;
 }
 
 int Board::evaluate_aux(const State s)const
@@ -455,11 +424,6 @@ int Board::evaluate_aux(const State s)const
 	sum += cnt_two * 120;
 	sum += cnt_three_with_hole * 120;
 	sum += cnt_one * 20;
-	//auto end = system_clock::now();
-	//auto duration = duration_cast<microseconds>(end - start);
-	//std::cout << "»¨·ÑÁË"
-	//	<< double(duration.count()) * microseconds::period::num / microseconds::period::den
-	//	<< "Ãë" << std::endl;
 	return sum;
 }
 

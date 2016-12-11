@@ -11,15 +11,15 @@ public:
 	static State player;
 
 	Board()
-		:points(15, std::vector<State>(15, State::Empty)) {};
+		:zobrist_value(0), points(15, std::vector<State>(15, State::Empty)) {};
 	~Board() = default;
-	bool operator==(const Board& other)const
-	{
-		return points == other.points;
-	}
 	void play(int x, int y, State s)
 	{
 		points[x][y] = s;
+		if (s == State::Black)
+			zobrist_value ^= random_table[x][y].first;
+		else
+			zobrist_value ^= random_table[x][y].second;
 	}
 	State get_state(int x, int y) const
 	{
@@ -27,19 +27,21 @@ public:
 	}
 	void erase(int x, int y)
 	{
+		if (points[x][y] == State::Black)
+			zobrist_value ^= random_table[x][y].first;
+		else
+			zobrist_value ^= random_table[x][y].second;
 		points[x][y] = State::Empty;
 	}
 	std::vector<std::pair<int, int>> possible_moves();
 	int evaluate()const
 	{
-		if (computer == State::Black)
-			return evaluate_aux(computer) - 0.8 * evaluate_aux(player);
-		return evaluate_aux(player) - 0.8 * evaluate_aux(computer); //computer plays white
+		return evaluate_aux(computer) - evaluate_aux(player);
 	}
 	void clear()
 	{
-		for (auto &row : points)
-			for (auto &col : row)
+		for (auto& row : points)
+			for (auto& col : row)
 				col = State::Empty;
 	}
 	static void set_black_computer()
@@ -61,11 +63,18 @@ public:
 		return computer != State::Empty;
 	}
 	State get_winner()const;
-	long long get_zobrist_value()const;
-private:
+	long long get_zobrist_value()const
+	{
+		return zobrist_value;
+	}
 	using BoardTable = std::array<std::array<std::pair<long long, long long>, 15>, 15>;
+	static void init_table(BoardTable& b)
+	{
+		random_table = b;
+	}
+private:
 	static BoardTable random_table;
-	static BoardTable random_init();
+	long long zobrist_value;
 	std::vector<std::vector<State>> points;
 	int evaluate_aux(const State s)const;
 };
