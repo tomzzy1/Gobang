@@ -59,7 +59,7 @@
     <ClCompile Include="Trans_map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="minimax_search.cpp">
+    <ClCompile Include="negamax.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,7 +90,10 @@
     <ClInclude Include="Trans_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="minimax_search.h">
+    <ClInclude Include="spinlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="negamax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
