@@ -3,7 +3,7 @@
 #include <random>
 
 GobangWithUI::GobangWithUI(QWidget *parent)
-	: QMainWindow(parent), num_count(0)
+	: QMainWindow(parent), num_count(0), difficulty(5)
 {
 	Board::BoardTable table;
 	std::default_random_engine generator(time(nullptr));
@@ -25,6 +25,9 @@ GobangWithUI::GobangWithUI(QWidget *parent)
 	connect(ui.AI_opponent, SIGNAL(triggered()), this, SLOT(set_opponent_AI()));
 	connect(ui.human_oppenent, SIGNAL(triggered()), this, SLOT(set_opponent_player()));
 	connect(ui.clear_board, SIGNAL(triggered()), this, SLOT(clear_board()));
+	connect(ui.easy_difficulty, SIGNAL(triggered()), this, SLOT(set_easy_difficulty()));
+	connect(ui.normal_difficulty, SIGNAL(triggered()), this, SLOT(set_normal_difficulty()));
+	connect(ui.hard_difficulty, SIGNAL(triggered()), this, SLOT(set_hard_difficulty()));
 	default_first_move();
 }
 
@@ -79,6 +82,9 @@ void GobangWithUI::set_opponent_AI()
 {
 	ui.play_black->setEnabled(true);
 	ui.play_white->setEnabled(true);
+	ui.easy_difficulty->setEnabled(true);
+	ui.normal_difficulty->setEnabled(true);
+	ui.hard_difficulty->setEnabled(true);
 	set_black_computer();
 }
 
@@ -86,6 +92,9 @@ void GobangWithUI::set_opponent_player()
 {
 	ui.play_black->setEnabled(false);
 	ui.play_white->setEnabled(false);
+	ui.easy_difficulty->setEnabled(false);
+	ui.normal_difficulty->setEnabled(false);
+	ui.hard_difficulty->setEnabled(false);
 	Board::set_opponent_player();
 	clear();
 	update();
@@ -96,6 +105,24 @@ void GobangWithUI::clear_board()
 	clear();
 	if (board.is_opponent_AI() && Board::computer == Board::State::Black)
 		default_first_move();
+}
+
+void GobangWithUI::set_easy_difficulty()
+{
+	difficulty = 3;//search depth
+	clear_board();
+}
+
+void GobangWithUI::set_normal_difficulty()
+{
+	difficulty = 5;//search depth
+	clear_board();
+}
+
+void GobangWithUI::set_hard_difficulty()
+{
+	difficulty = 7;//search depth
+	clear_board();
 }
 
 void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
@@ -133,8 +160,7 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 			{
 				if (Board::is_opponent_AI())
 				{
-					auto move = negamax.search(board);
-					QMessageBox::question(this, "depth", std::to_string(negamax.depth_.load()).c_str(), QMessageBox::Yes);
+					auto move = negamax.search(board, difficulty);
 					play(move.first + 1, move.second + 1);
 					const auto winner2 = board.get_winner();
 					if (winner2 == Board::computer)

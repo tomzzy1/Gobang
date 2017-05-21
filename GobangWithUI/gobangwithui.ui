@@ -48,8 +48,17 @@
     <addaction name="AI_opponent"/>
     <addaction name="human_oppenent"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>难度</string>
+    </property>
+    <addaction name="easy_difficulty"/>
+    <addaction name="normal_difficulty"/>
+    <addaction name="hard_difficulty"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
   </widget>
   <action name="play_black">
    <property name="text">
@@ -74,6 +83,21 @@
   <action name="clear_board">
    <property name="text">
     <string>清空棋局</string>
+   </property>
+  </action>
+  <action name="easy_difficulty">
+   <property name="text">
+    <string>简单</string>
+   </property>
+  </action>
+  <action name="normal_difficulty">
+   <property name="text">
+    <string>一般</string>
+   </property>
+  </action>
+  <action name="hard_difficulty">
+   <property name="text">
+    <string>困难</string>
    </property>
   </action>
  </widget>

@@ -90,9 +90,6 @@
     <ClInclude Include="Trans_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="spinlock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="negamax.h">
       <Filter>Header Files</Filter>
     </ClInclude>

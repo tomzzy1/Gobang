@@ -1,5 +1,4 @@
 #include "Hash_tag.h"
-#include <mutex>
 
 Hash_tag::~Hash_tag()
 {
@@ -9,7 +8,6 @@ void Hash_tag::set(int d, int v, Hash_flag type, long long zobrist)
 {
 	if (d <= depth_ || hash_type == Hash_flag::Empty)
 	{
-		std::lock_guard<Spinlock> guard(lock);
 		depth_ = d;
 		score = v;
 		hash_type = type;

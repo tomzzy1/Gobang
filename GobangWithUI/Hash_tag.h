@@ -1,6 +1,5 @@
 #pragma once
 #define Val_unknown 1000001
-#include "spinlock.h"
 
 class Hash_tag
 {
@@ -15,7 +14,6 @@ public:
 	void clear();
 	int get_score(int depth, int& alpha, int& beta, long long zobrist) const;
 private:
-	Spinlock lock;
 	int depth_;
 	int score;
 	long long key;

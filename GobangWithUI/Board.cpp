@@ -9,35 +9,86 @@ Board::State Board::player = State::White;
 
 std::vector<std::pair<int, int>> Board::possible_moves()
 {
-	auto no_more_than_14 = [](int n) {return n > 14 ? 14 : n; };
-	auto no_less_than_0 = [](int n) {return n < 0 ? 0 : n; };
+	auto not_more_than_14 = [](int n) {return n > 14 ? 14 : n; };
+	auto not_less_than_0 = [](int n) {return n < 0 ? 0 : n; };
 	std::set<std::pair<int, int>> moves;
 	auto insert_if_empty = [&](int x_pos, int y_pos)
 	{
 		if (points[x_pos][y_pos] == State::Empty)
 			moves.insert({ x_pos,y_pos });
 	};
+	auto key_pos_insert = [&](State s, int i, int j)
+	{
+		if (points[not_more_than_14(i + 1)][j] == s)
+		{
+			insert_if_empty(not_less_than_0(i - 2), j);
+			if (points[not_more_than_14(i + 3)][j] == s)
+				insert_if_empty(not_less_than_0(i - 3), j);
+		}
+		if (points[not_more_than_14(i + 1)][not_more_than_14(j + 1)] == s)
+		{
+			insert_if_empty(not_less_than_0(i - 2), not_less_than_0(j - 2));
+			if (points[not_more_than_14(i + 3)][not_more_than_14(j + 3)] == s)
+				insert_if_empty(not_less_than_0(i - 3), not_less_than_0(j - 3));
+		}
+		if (points[i][not_more_than_14(j + 1)] == s)
+		{
+			insert_if_empty(i, not_less_than_0(j - 2));
+			if (points[i][not_more_than_14(j + 2)] == s)
+				insert_if_empty(i, not_less_than_0(j - 3));
+		}
+		if (points[not_less_than_0(i - 1)][not_more_than_14(j + 1)] == s)
+		{
+			insert_if_empty(not_more_than_14(i + 1), not_less_than_0(j - 1));
+			if (points[not_less_than_0(i - 2)][not_more_than_14(j + 2)] == s)
+				insert_if_empty(not_more_than_14(i + 2), not_less_than_0(j - 2));
+		}
+		if (points[not_less_than_0(i - 1)][j] == s)
+		{
+			insert_if_empty(not_more_than_14(i + 2), j);
+			if (points[not_less_than_0(i - 2)][j] == s)
+				insert_if_empty(not_more_than_14(i + 3), j);
+		}
+		if (points[not_less_than_0(i - 1)][not_less_than_0(j - 1)] == s)
+		{
+			insert_if_empty(not_more_than_14(i + 2), not_more_than_14(j + 2));
+			if (points[not_less_than_0(i - 2)][not_less_than_0(j - 2)] == s)
+				insert_if_empty(not_more_than_14(i + 3), not_more_than_14(j + 3));
+		}
+		if (points[i][not_less_than_0(j - 1)] == s)
+		{
+			insert_if_empty(i, not_more_than_14(j + 2));
+			if (points[i][not_less_than_0(j - 2)] == s)
+				insert_if_empty(i, not_more_than_14(j + 3));
+		}
+		if (points[not_more_than_14(i + 1)][not_less_than_0(j - 1)] == s)
+		{
+			insert_if_empty(not_less_than_0(i - 2), not_more_than_14(j + 2));
+			if (points[not_more_than_14(i + 1)][not_less_than_0(j - 1)] == s)
+				insert_if_empty(not_less_than_0(i - 3), not_more_than_14(j + 3));
+		}
+	};
 	for (int i = 0; i < 15; ++i)
 		for (int j = 0; j < 15; ++j)
 		{
 			if (points[i][j] != State::Empty) //position around a not empty position is meaningful
 			{
-				for (int k = 1; k <= 2; ++k)
+				for (int k = 1; k <= 1; ++k)
 				{
-					insert_if_empty(i, no_more_than_14(j + k));
-					insert_if_empty(i, no_less_than_0(j - k));
-					insert_if_empty(no_more_than_14(i + k), j);
-					insert_if_empty(no_less_than_0(i - k), j);
-					insert_if_empty(no_more_than_14(i + k), no_more_than_14(j + k));
-					insert_if_empty(no_less_than_0(i - k), no_more_than_14(j + k));
-					insert_if_empty(no_more_than_14(i + k), no_less_than_0(j - k));
-					insert_if_empty(no_less_than_0(i - k), no_less_than_0(j - k));
+					insert_if_empty(i, not_more_than_14(j + k));
+					insert_if_empty(i, not_less_than_0(j - k));
+					insert_if_empty(not_more_than_14(i + k), j);
+					insert_if_empty(not_less_than_0(i - k), j);
+					insert_if_empty(not_more_than_14(i + k), not_more_than_14(j + k));
+					insert_if_empty(not_less_than_0(i - k), not_more_than_14(j + k));
+					insert_if_empty(not_more_than_14(i + k), not_less_than_0(j - k));
+					insert_if_empty(not_less_than_0(i - k), not_less_than_0(j - k));
 				}
+				key_pos_insert(State::Black, i, j);
+				key_pos_insert(State::White, i, j);
 			}
 		}
-	std::vector<std::pair<int, int>> temp(moves.size());
-	std::copy(moves.begin(), moves.end(), temp.begin());
-	return temp;
+	return std::vector<std::pair<int, int>>(moves.begin(), moves.end());
 }
 
 Board::State Board::get_winner() const
@@ -69,34 +120,32 @@ Board::State Board::get_winner() const
 	for (int i = 0; i < 11; ++i)
 		for (int j = 0; j < 11; ++j)
 		{
-			if (points[i][j] == State::Black
-				&& points[i + 1][j + 1] == State::Black && points[i + 2][j + 2] == State::Black
-				&& points[i + 3][j + 3] == State::Black && points[i + 4][j + 4] == State::Black)
-				return State::Black;
 			if (points[i][j] == State::White
 				&& points[i + 1][j + 1] == State::White && points[i + 2][j + 2] == State::White
 				&& points[i + 3][j + 3] == State::White && points[i + 4][j + 4] == State::White)
 				return State::White;
+			if (points[i][j] == State::Black
+				&& points[i + 1][j + 1] == State::Black && points[i + 2][j + 2] == State::Black
+				&& points[i + 3][j + 3] == State::Black && points[i + 4][j + 4] == State::Black)
+				return State::Black;
 		}
 	for (int i = 0; i < 11; ++i)
 		for (int j = 14; j >= 4; --j)
 		{
-			if (points[i][j] == State::Black
-				&& points[i + 1][j - 1] == State::Black && points[i + 2][j - 2] == State::Black
-				&& points[i + 3][j - 3] == State::Black && points[i + 4][j - 4] == State::Black)
-				return State::Black;
 			if (points[i][j] == State::White
 				&& points[i + 1][j - 1] == State::White && points[i + 2][j - 2] == State::White
 				&& points[i + 3][j - 3] == State::White && points[i + 4][j - 4] == State::White)
 				return State::White;
+			if (points[i][j] == State::Black
+				&& points[i + 1][j - 1] == State::Black && points[i + 2][j - 2] == State::Black
+				&& points[i + 3][j - 3] == State::Black && points[i + 4][j - 4] == State::Black)
+				return State::Black;
 		}
 	return State::Empty;
 }
 
-int Board::evaluate_aux(const State s)const
+int Board::evaluate_aux(State s)
 {
-	//using namespace std::chrono;
-	//auto start = system_clock::now();
 	int sum = 0;
 	int cnt_four = 0;
 	int cnt_three = 0;
@@ -108,8 +157,6 @@ int Board::evaluate_aux(const State s)const
 	int cnt_bad_four = 0;
 	int cnt_two_two = 0;
 	int cnt_one_three = 0;
-	//horizonal
-	// loop for six
 	for (int i = 0; i <= 14; ++i)
 		for (int j = 0; j <= 9; ++j)
 		{
@@ -426,6 +473,3 @@ int Board::evaluate_aux(const State s)const
 	sum += cnt_one * 20;
 	return sum;
 }
-
-
-

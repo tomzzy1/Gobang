@@ -1,8 +1,11 @@
 #pragma once
 #include <future>
-#include <queue>
 #include <vector>
+#include <deque>
+#include <queue>
 #include <type_traits>
+#include <chrono>
+#include <map>
 
 template<typename T>
 class async_queue
@@ -10,7 +13,7 @@ class async_queue
 public:
 	async_queue(size_t c = 10) :size(c), count(c) {}
 	async_queue(async_queue<T>&) = delete;
-	async_queue& operator=(const async_queue<T>&) = delete;	
+	async_queue& operator=(const async_queue<T>&) = delete;
 	async_queue& operator=(async_queue<T>&& aq)noexcept
 	{
 		if (this != &aq)
@@ -34,14 +37,14 @@ public:
 	{
 		if (count == 0)
 		{
-			for (int i = 0; i < size / 5; ++i)
+			for (int i = 0; i < size / 4; ++i)
 			{
 				results.push_back(future_queue.front().get());
 				future_queue.pop();
 			}
-			count += size / 5;
+			count += size / 4;
 			auto future = std::async(std::launch::async, std::forward<Fn>(function), std::forward<args>(Args)...);
-			future_queue.push(std::move(future));		
+			future_queue.push(std::move(future));
 		}
 		else
 		{

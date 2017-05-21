@@ -10,8 +10,14 @@ public:
 	static State computer;
 	static State player;
 
-	Board()
-		:zobrist_value(0), points(15, std::vector<State>(15, State::Empty)) {};
+	Board() :zobrist_value(0)
+	{
+		for (auto& row : points)
+			for (auto& point : row)
+			{
+				point = State::Empty;
+			}
+	}
 	~Board() = default;
 	void play(int x, int y, State s)
 	{
@@ -34,15 +40,15 @@ public:
 		points[x][y] = State::Empty;
 	}
 	std::vector<std::pair<int, int>> possible_moves();
-	int evaluate()const
+	int evaluate()
 	{
 		return evaluate_aux(computer) - evaluate_aux(player);
 	}
 	void clear()
 	{
 		for (auto& row : points)
-			for (auto& col : row)
-				col = State::Empty;
+			for (auto& point : row)
+				point = State::Empty;
 	}
 	static void set_black_computer()
 	{
@@ -68,15 +74,15 @@ public:
 		return zobrist_value;
 	}
 	using BoardTable = std::array<std::array<std::pair<long long, long long>, 15>, 15>;
-	static void init_table(BoardTable& b)
+	void init_table(BoardTable& b)
 	{
 		random_table = b;
 	}
 private:
 	static BoardTable random_table;
+	std::array<std::array<State, 15>, 15> points;
 	long long zobrist_value;
-	std::vector<std::vector<State>> points;
-	int evaluate_aux(const State s)const;
+	int evaluate_aux(State s);
 };
 
 
