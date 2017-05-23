@@ -1,2 +1,2 @@
-# GobangWithUI
+# Gobang
 A Gobang AI
