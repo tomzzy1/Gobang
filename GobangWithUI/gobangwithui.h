@@ -35,9 +35,10 @@ private:
 	Ui::GobangWithUIClass ui;
 	Board board;
 	Negamax_search negamax;
-	int num_count;
+	int moves_count;
 	std::array<std::pair<int, int>, 225> point_state;
 	int difficulty;
+	void set_enabled(bool b);
 public slots:
 	void set_black_computer();
 	void set_black_player();

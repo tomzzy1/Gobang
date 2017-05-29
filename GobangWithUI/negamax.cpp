@@ -27,9 +27,9 @@ int Negamax_search::negamax(Board& b, int alpha, int beta, int depth, std::vecto
 	auto zobrist_value = b.get_zobrist_value();
 	auto& hash_tag = trans_map[zobrist_value];
 	auto val = hash_tag.get_score(depth, alpha, beta, zobrist_value);
-	if (val != Val_unknown)
+	if (val.has_value())
 	{
-		return val;
+		return val.value();
 	}
 	auto flag = Hash_tag::Hash_flag::Alpha;
 	if (depth == 0 || b.get_winner() != Board::State::Empty)

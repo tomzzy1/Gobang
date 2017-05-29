@@ -3,18 +3,18 @@
 #include <random>
 
 GobangWithUI::GobangWithUI(QWidget *parent)
-	: QMainWindow(parent), num_count(0), difficulty(5)
+	: QMainWindow(parent), moves_count(0), difficulty(5)
 {
 	Board::BoardTable table;
 	std::default_random_engine generator(time(nullptr));
-	std::uniform_int_distribution<long long> dis(0, 9223372036854775807LL);
+	std::uniform_int_distribution<long long> dis(0, 9223372036854775807LL); //long long max
 	for (auto& row : table)
 		for (auto& col : row)
 		{
 			col.first = dis(generator);
 			col.second = dis(generator);
 		}
-	board.init_table(table);
+	Board::init_table(table);
 	setMaximumHeight(640);
 	setMinimumHeight(640);
 	setMaximumSize(640, 640);
@@ -49,7 +49,7 @@ void GobangWithUI::paintEvent(QPaintEvent*)
 	}
 	QBrush brush;
 	brush.setStyle(Qt::SolidPattern);
-	for (int i = 0; i < num_count; ++i)
+	for (int i = 0; i < moves_count; ++i)
 	{
 		if (i % 2 == 0)
 		{
@@ -62,6 +62,15 @@ void GobangWithUI::paintEvent(QPaintEvent*)
 		painter.setBrush(brush);
 		painter.drawEllipse(point_state[i].first - 20, point_state[i].second - 20, 40, 40);
 	}
+}
+
+void GobangWithUI::set_enabled(bool b)
+{
+	ui.play_black->setEnabled(b);
+	ui.play_white->setEnabled(b);
+	ui.easy_difficulty->setEnabled(b);
+	ui.normal_difficulty->setEnabled(b);
+	ui.hard_difficulty->setEnabled(b);
 }
 
 void GobangWithUI::set_black_computer()
@@ -80,21 +89,13 @@ void GobangWithUI::set_black_player()
 
 void GobangWithUI::set_opponent_AI()
 {
-	ui.play_black->setEnabled(true);
-	ui.play_white->setEnabled(true);
-	ui.easy_difficulty->setEnabled(true);
-	ui.normal_difficulty->setEnabled(true);
-	ui.hard_difficulty->setEnabled(true);
+	set_enabled(true);
 	set_black_computer();
 }
 
 void GobangWithUI::set_opponent_player()
 {
-	ui.play_black->setEnabled(false);
-	ui.play_white->setEnabled(false);
-	ui.easy_difficulty->setEnabled(false);
-	ui.normal_difficulty->setEnabled(false);
-	ui.hard_difficulty->setEnabled(false);
+	set_enabled(false);
 	Board::set_opponent_player();
 	clear();
 	update();
@@ -152,7 +153,7 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 		}
 		else
 		{
-			if (num_count == 225)
+			if (moves_count == 225)
 			{
 				tie();
 			}
@@ -160,14 +161,14 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 			{
 				if (Board::is_opponent_AI())
 				{
-					auto move = negamax.search(board, difficulty);
+					const auto move = negamax.search(board, difficulty);
 					play(move.first + 1, move.second + 1);
 					const auto winner2 = board.get_winner();
 					if (winner2 == Board::computer)
 					{
 						computer_win();
 					}
-					else if (num_count == 225)
+					else if (moves_count == 225)
 					{
 						tie();
 					}
@@ -180,22 +181,22 @@ void GobangWithUI::mousePressEvent(QMouseEvent* mouseEvent)
 void GobangWithUI::clear()
 {
 	board.clear();
-	num_count = 0;
+	moves_count = 0;
 	update();
 }
 
 void GobangWithUI::default_first_move()
 {
 	board.play(7, 7, Board::State::Black);
-	point_state[num_count].first = 320;
-	point_state[num_count].second = 320;
-	++num_count;
+	point_state[moves_count].first = 320;
+	point_state[moves_count].second = 320;
+	++moves_count;
 	update();
 }
 
 void GobangWithUI::play(int x_pos, int y_pos)
 {
-	if (num_count % 2 == 0)
+	if (moves_count % 2 == 0)
 	{
 		board.play(x_pos - 1, y_pos - 1, Board::State::Black);
 	}
@@ -203,9 +204,9 @@ void GobangWithUI::play(int x_pos, int y_pos)
 	{
 		board.play(x_pos - 1, y_pos - 1, Board::State::White);
 	}
-	point_state[num_count].first = x_pos * 40;
-	point_state[num_count].second = y_pos * 40;
-	++num_count;
+	point_state[moves_count].first = x_pos * 40;
+	point_state[moves_count].second = y_pos * 40;
+	++moves_count;
 	repaint();
 }
 

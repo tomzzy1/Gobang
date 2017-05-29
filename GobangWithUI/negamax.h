@@ -8,14 +8,14 @@
 class Negamax_search
 {
 public:
-	Negamax_search() :Infinity(1000000), trans_map(48) {};
+	Negamax_search() : trans_map(48) {};
 	~Negamax_search() = default;
 	std::pair<int, int> search(Board& b, int difficulty)
 	{
 		return iterative_deepening_search(b, difficulty);
 	}
 private:
-	const int Infinity;
+	const int Infinity = 1000000;
 	Trans_map trans_map;
 	int negamax(Board& b, int alpha, int beta, int depth, std::vector<std::pair<int, int>>& moves, Board::State s);
 	std::pair<int, int> iterative_deepening_search(Board& b, int difficulty);

@@ -20,7 +20,7 @@ void Hash_tag::clear()
 	hash_type = Hash_flag::Empty;
 }
 
-int Hash_tag::get_score(int depth, int& alpha, int& beta, long long zobrist) const
+std::optional<int> Hash_tag::get_score(int depth, int& alpha, int& beta, long long zobrist) const
 {
 	if (depth >= depth_ && zobrist == key)
 	{
@@ -33,7 +33,7 @@ int Hash_tag::get_score(int depth, int& alpha, int& beta, long long zobrist) con
 		}
 		else if (hash_type == Hash_flag::Beta)
 		{
-			if(score >= beta)
+			if (score >= beta)
 				return beta;
 			if (score > alpha)
 				alpha = score;
@@ -43,5 +43,5 @@ int Hash_tag::get_score(int depth, int& alpha, int& beta, long long zobrist) con
 			return score;
 		}
 	}
-	return Val_unknown;
+	return {};
 }
